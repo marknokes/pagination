@@ -10,12 +10,14 @@ class Pagination
 	* @return object The only real use for the return object are the links, i.e., if you instantiate $pagination = new Pagination(); you would echo $pagination->links
 	*				 Public methods include (static) get_offset(), result_per_page_form(), and (static) get_rows_per_page(). The two static methods may be useful for 
 	*				 your pagination query.
-	*/
+	*/	
 	function __construct( $args = array() )
 	{
 		$defaults = array(
 			'total_records'			=> 0,
 			'visible_page_numbers'	=> 0,
+			'default_rows_per_page'	=> 10,
+			'max_rows_per_page'		=> 99,
 			'page_get_var'			=> 'page',
 			'perpage_get_var'		=> 'perpage',
 			'style'					=> false,
@@ -29,19 +31,12 @@ class Pagination
 		);
 				
 		$args = array_merge( $defaults, $args );
-
-		$this->link_text			= $args['link_text'];
-		$this->row_count			= $args['total_records'];
-		$this->visible_page_numbers = $args['visible_page_numbers'];
-		$this->style				= $args['style'];
-		$this->css_class 			= $args['class'];
-		$this->page_get_var			= $args['page_get_var'];
-		$this->perpage_get_var		= $args['perpage_get_var'];
-		$this->current_page			= $this->get_current_page();
+		$this->args					= $args;
 		$this->rows_per_page 		= $this->get_rows_per_page();
+		$this->current_page			= $this->get_current_page();
 		$this->prev_page			= $this->current_page -1;
 		$this->next_page			= $this->current_page +1;
-		$this->last_page 			= ceil( $this->row_count / $this->rows_per_page  );
+		$this->last_page 			= ceil( $this->args['total_records'] / $this->rows_per_page  );
 		$this->links				= $this->links();
 	}
 	
@@ -82,17 +77,17 @@ class Pagination
 			$form = '<div class="results-per-page '. $args['class'] .'"><form action="'. $args['action'] .'" method="'. $args['method'] .'">';
 			foreach ( $_GET as $param => $value )
 			{	
-				if ( $param == $this->perpage_get_var || $param == $this->page_get_var ) continue;
+				if ( $param == $this->args['perpage_get_var'] || $param == $this->args['page_get_var'] ) continue;
 				$form .= '<input type="hidden" name="'. $param .'" value="'. $value .'">';
 			}
 			if ( $args['label'] )
 			{
 				$form.=	'<label for="perpage">'. $args['label'] .'</label>';
 			}
-			$form .= '<select name="'. $this->perpage_get_var .'">';
+			$form .= '<select name="'. $this->args['perpage_get_var'] .'">';
 					foreach ( $args['options'] as $num )
 					{
-						if ( $_GET[$this->perpage_get_var] == $num )
+						if ( $_GET[$this->args['perpage_get_var']] == $num )
 						{
 							$form .= '<option selected="selected" value="'. $num .'">'. $num .'</option>';
 						}
@@ -116,11 +111,15 @@ class Pagination
 	/**
 	* Gets the rows per page
 	*
-	* @return int Returns $_GET['perpage'] if it's set, numeric, and < 99, otherwise 10
+	* @return int Returns $_GET['perpage'] if it's set, numeric, and <= $this->args['max_rows_per_page'], otherwise $this->args['default_rows_per_page']
 	*/
 	public function get_rows_per_page()
 	{
-		$rows_per_page 	= ( $_GET[$this->perpage_get_var] && is_numeric( $_GET[$this->perpage_get_var] ) && ( $_GET[$this->perpage_get_var] <= 99 ) ) ? $_GET[$this->perpage_get_var] : 10;
+		$rows_per_page 	= (
+			$_GET[$this->args['perpage_get_var']] &&
+			is_numeric( $_GET[$this->args['perpage_get_var']] ) &&
+			( $_GET[$this->args['perpage_get_var']] <= $this->args['max_rows_per_page'] )
+		) ? $_GET[$this->args['perpage_get_var']] : $this->args['default_rows_per_page'];
 		return $rows_per_page;
 	}
 	
@@ -131,7 +130,10 @@ class Pagination
 	*/
 	private function get_current_page()
 	{
-		$current_page 	= ( $_GET[$this->page_get_var] && is_numeric( $_GET[$this->page_get_var] ) ) ? $_GET[$this->page_get_var] : 1;
+		$current_page 	= (
+			$_GET[$this->args['page_get_var']] &&
+			is_numeric( $_GET[$this->args['page_get_var']] )
+		) ? $_GET[$this->args['page_get_var']] : 1;
 		return $current_page;
 	}
 	
@@ -142,7 +144,7 @@ class Pagination
 	*/
 	private function get_query_string()
 	{
-		$disallow		= array( $this->perpage_get_var , $this->page_get_var );
+		$disallow		= array( $this->args['perpage_get_var'] , $this->args['page_get_var'] );
 		$disallow_count	= sizeof( $disallow ) + 1;
 		$i				= $disallow_count - 1;
 		$query_string	= '';
@@ -176,10 +178,10 @@ class Pagination
 	*/
 	private function visible_page_number_links()
 	{
-		if ( $this->last_page != 1 && $this->last_page >= $this->visible_page_numbers )
+		if ( $this->last_page != 1 && $this->last_page >= $this->args['visible_page_numbers'] )
 		{
 			$links_array = array();
-			for( $i = 1 ; $this->row_count >= $i ; $i++ )
+			for( $i = 1 ; $this->args['total_records'] >= $i ; $i++ )
 			{
 				if ( $i == $this->current_page )
 					$active = 'class="active"';
@@ -188,18 +190,18 @@ class Pagination
 				
 				$links_array[$i] = '<li '. $active .'>'. $this->render_link( 'visible' , $i ) .'</li>';
 			}
-			$numbers_before = ceil( $this->visible_page_numbers/2 );
-			$numbers_after 	= floor( $this->visible_page_numbers/2 );
+			$numbers_before = ceil( $this->args['visible_page_numbers']/2 );
+			$numbers_after 	= floor( $this->args['visible_page_numbers']/2 );
 			
 			if ( $this->current_page <= $numbers_before )
 				// beginning
-				$visible = array_slice( $links_array , 0 , $this->visible_page_numbers );			
+				$visible = array_slice( $links_array , 0 , $this->args['visible_page_numbers'] );			
 			elseif ( $this->last_page - $this->current_page <= $numbers_after )
 				// end
-				$visible = array_slice( $links_array, $this->last_page - $this->visible_page_numbers, $this->visible_page_numbers );			
+				$visible = array_slice( $links_array, $this->last_page - $this->args['visible_page_numbers'], $this->args['visible_page_numbers'] );			
 			else 
 				// middle
-				$visible = array_slice( $links_array , $this->current_page - $numbers_before , $this->visible_page_numbers );
+				$visible = array_slice( $links_array , $this->current_page - $numbers_before , $this->args['visible_page_numbers'] );
 				
 			$links = implode( '' , $visible );
 			return $links;
@@ -270,11 +272,11 @@ class Pagination
 	
 	private function render_link( $type , $page )
 	{
-		$url = '?' . $this->get_query_string() . $this->perpage_get_var .'='. $this->rows_per_page . '&'. $this->page_get_var .'=' . $page;
+		$url = '?' . $this->get_query_string() . $this->args['perpage_get_var'] .'='. $this->rows_per_page . '&'. $this->args['page_get_var'] .'=' . $page;
 		if ( $type == 'visible' )
 			$link = '<a class="pagination-anchor visible-page-number-'. $page .'" href="'. $url .'">'. $page .'</a>';
 		else
-			$link = '<li><a class="pagination-anchor '. $type .'" href="'. $url .'">'. $this->link_text[$type] .'</a></li>';
+			$link = '<li><a class="pagination-anchor '. $type .'" href="'. $url .'">'. $this->args['link_text'][$type] .'</a></li>';
 		return $link;
 	}
 	
@@ -285,11 +287,11 @@ class Pagination
 	*/	
 	private function links()
 	{
-		if ( $this->last_page != 0 && $this->row_count > $this->rows_per_page )
+		if ( $this->last_page != 0 && $this->args['total_records'] > $this->rows_per_page )
 		{
 			$links = '';
 			
-			if ( $this->style )
+			if ( $this->args['style'] )
 			{
 				ob_start();
 				include 'pagination.css';
@@ -297,7 +299,7 @@ class Pagination
 				$links .= '<style>'.$css.'</style>';
 			}
 				
-			$links .= '<div class="pagination '.$this->css_class.'"><ul>';
+			$links .= '<div class="pagination '.$this->args['css_class'].'"><ul>';
 			$links .= $this->first_link();
 			$links .= $this->prev_link();
 			$links .= $this->visible_page_number_links();

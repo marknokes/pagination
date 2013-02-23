@@ -191,7 +191,7 @@ class Pagination
 			$numbers_before = ceil( $this->visible_page_numbers/2 );
 			$numbers_after 	= floor( $this->visible_page_numbers/2 );
 			
-			if ( $this->current_page <= ( $numbers_before ) )
+			if ( $this->current_page <= $numbers_before )
 				// beginning
 				$visible = array_slice( $links_array , 0, $this->visible_page_numbers );			
 			elseif ( $this->last_page - $this->current_page <= $numbers_after )

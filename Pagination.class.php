@@ -274,7 +274,7 @@ class Pagination
 		if ( $type == 'visible' )
 			$link = '<a class="pagination-anchor visible-page-number-'. $page .'" href="'. $url .'">'. $page .'</a>';
 		else
-			$link = '<a class="pagination-anchor '. $type .'" href="'. $url .'">'. $this->link_text[$type] .'</a>';
+			$link = '<li><a class="pagination-anchor '. $type .'" href="'. $url .'">'. $this->link_text[$type] .'</a></li>';
 		return $link;
 	}
 	
@@ -298,11 +298,11 @@ class Pagination
 			}
 				
 			$links .= '<div class="pagination '.$this->css_class.'"><ul>';
-			$links .= $this->first_link() ? '<li>' . $this->first_link() . '</li>' : '';
-			$links .= $this->prev_link() ? '<li>' . $this->prev_link() . '</li>' : '';
+			$links .= $this->first_link;
+			$links .= $this->prev_link();
 			$links .= $this->visible_page_number_links();
-			$links .= $this->next_link() ? '<li>' . $this->next_link() . '</li>' : '';
-			$links .= $this->last_link() ? '<li>' . $this->last_link() . '</li>' : '';
+			$links .= $this->next_link();
+			$links .= $this->last_link();
 			$links .= '</ul></div>';
 			return $links;
 		}

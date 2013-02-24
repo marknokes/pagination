@@ -7,21 +7,21 @@ class Pagination
 	*
 	* @param array $args Array of arguments. Defaults may be seen below in __construct()
 	*
-	* @return object The only real use for the return object are the links, i.e., if you instantiate $pagination = new Pagination(); you would echo $pagination->links
-	*				 Public methods include (static) get_offset(), result_per_page_form(), and (static) get_rows_per_page(). The two static methods may be useful for 
+	* @return object The only real use for the return object are the links, i.e., if you instantiate $pagination = new Pagination(),
+	*				 you would echo $pagination->links. Public methods include (static) get_offset(), result_per_page_form(),
+	*				 and (static) get_rows_per_page(). The two static methods may be useful for 
 	*				 your pagination query.
-	*/	
+	*/
+	
+	private static $page_vars;
+	
 	function __construct( $args = array() )
 	{
 		$defaults = array(
 			'total_records'			=> 0,
 			'visible_page_numbers'	=> 0,
-			'default_rows_per_page'	=> 10,
-			'max_rows_per_page'		=> 99,
-			'page_get_var'			=> 'page',
-			'perpage_get_var'		=> 'perpage',
 			'style'					=> false,
-			'class'					=> '',
+			'container_class'		=> '',
 			'link_text'				=> array(
 				'next'	=> 'Next',
 				'prev'	=> 'Previous',
@@ -32,12 +32,29 @@ class Pagination
 				
 		$args = array_merge( $defaults, $args );
 		$this->args					= $args;
-		$this->rows_per_page 		= $this->get_rows_per_page();
-		$this->current_page			= $this->get_current_page();
+		$this->rows_per_page 		= self::get_rows_per_page();
+		$this->current_page			= self::get_current_page();
 		$this->prev_page			= $this->current_page -1;
 		$this->next_page			= $this->current_page +1;
 		$this->last_page 			= ceil( $this->args['total_records'] / $this->rows_per_page  );
 		$this->links				= $this->links();
+	}
+	
+	/**
+	* Set up the variables for the GET vars and default values
+	*
+	* @return null This just sets up private static $page_vars for use throughout the class
+	*/
+	public static function set_up_vars( $default, $max, $page, $perpage )
+	{
+		$vars = array(
+			'default_rows_per_page'	=> $default,
+			'max_rows_per_page'		=> $max,
+			'page_get_var'			=> $page,
+			'perpage_get_var'		=> $perpage,
+		);
+		self::$page_vars = $vars;
+		return null;
 	}
 	
 	/**
@@ -51,6 +68,35 @@ class Pagination
 		return $offset;
 	}
 	
+	/**
+	* Gets the rows per page
+	*
+	* @return int Returns per_page_get_var|default
+	*/
+	public static function get_rows_per_page()
+	{
+		$rows_per_page 	= (
+			$_GET[self::$page_vars['perpage_get_var']] &&
+			is_numeric( $_GET[self::$page_vars['perpage_get_var']] ) &&
+			( $_GET[self::$page_vars['perpage_get_var']] <= self::$page_vars['max_rows_per_page'] )
+		) ? $_GET[self::$page_vars['perpage_get_var']] : self::$page_vars['default_rows_per_page'];
+		return $rows_per_page;
+	}
+	
+	/**
+	* Gets the current page
+	*
+	* @return int Returns page_get_var|1
+	*/
+	public static function get_current_page()
+	{
+		$current_page 	= (
+			$_GET[self::$page_vars['page_get_var']] &&
+			is_numeric( $_GET[self::$page_vars['page_get_var']] )
+		) ? $_GET[self::$page_vars['page_get_var']] : 1;
+		return $current_page;
+	}
+
 	/**
 	* Display a results per page form
 	*
@@ -77,17 +123,17 @@ class Pagination
 			$form = '<div class="results-per-page '. $args['class'] .'"><form action="'. $args['action'] .'" method="'. $args['method'] .'">';
 			foreach ( $_GET as $param => $value )
 			{	
-				if ( $param == $this->args['perpage_get_var'] || $param == $this->args['page_get_var'] ) continue;
+				if ( $param == self::$page_vars['perpage_get_var'] || $param == self::$page_vars['page_get_var'] ) continue;
 				$form .= '<input type="hidden" name="'. $param .'" value="'. $value .'">';
 			}
 			if ( $args['label'] )
 			{
 				$form.=	'<label for="perpage">'. $args['label'] .'</label>';
 			}
-			$form .= '<select name="'. $this->args['perpage_get_var'] .'">';
+			$form .= '<select name="'. self::$page_vars['perpage_get_var'] .'">';
 					foreach ( $args['options'] as $num )
 					{
-						if ( $_GET[$this->args['perpage_get_var']] == $num )
+						if ( $_GET[self::$page_vars['perpage_get_var']] == $num )
 						{
 							$form .= '<option selected="selected" value="'. $num .'">'. $num .'</option>';
 						}
@@ -107,36 +153,7 @@ class Pagination
 		}
 		else return null;
 	}
-	
-	/**
-	* Gets the rows per page
-	*
-	* @return int Returns $_GET['perpage'] if it's set, numeric, and <= $this->args['max_rows_per_page'], otherwise $this->args['default_rows_per_page']
-	*/
-	public function get_rows_per_page()
-	{
-		$rows_per_page 	= (
-			$_GET[$this->args['perpage_get_var']] &&
-			is_numeric( $_GET[$this->args['perpage_get_var']] ) &&
-			( $_GET[$this->args['perpage_get_var']] <= $this->args['max_rows_per_page'] )
-		) ? $_GET[$this->args['perpage_get_var']] : $this->args['default_rows_per_page'];
-		return $rows_per_page;
-	}
-	
-	/**
-	* Gets the current page
-	*
-	* @return int Returns $_GET['page'] if it's set and numeric, otherwise 1
-	*/
-	private function get_current_page()
-	{
-		$current_page 	= (
-			$_GET[$this->args['page_get_var']] &&
-			is_numeric( $_GET[$this->args['page_get_var']] )
-		) ? $_GET[$this->args['page_get_var']] : 1;
-		return $current_page;
-	}
-	
+		
 	/**
 	* Gets the current query string for use in the returned links
 	*
@@ -144,7 +161,7 @@ class Pagination
 	*/
 	private function get_query_string()
 	{
-		$disallow		= array( $this->args['perpage_get_var'] , $this->args['page_get_var'] );
+		$disallow		= array( self::$page_vars['perpage_get_var'] , self::$page_vars['page_get_var'] );
 		$disallow_count	= sizeof( $disallow ) + 1;
 		$i				= $disallow_count - 1;
 		$query_string	= '';
@@ -272,7 +289,7 @@ class Pagination
 	
 	private function render_link( $type , $page )
 	{
-		$url = '?' . $this->get_query_string() . $this->args['perpage_get_var'] .'='. $this->rows_per_page . '&'. $this->args['page_get_var'] .'=' . $page;
+		$url = '?' . $this->get_query_string() . self::$page_vars['perpage_get_var'] .'='. $this->rows_per_page . '&'. self::$page_vars['page_get_var'] .'=' . $page;
 		if ( $type == 'visible' )
 			$link = '<a class="pagination-anchor visible-page-number-'. $page .'" href="'. $url .'">'. $page .'</a>';
 		else
@@ -299,7 +316,7 @@ class Pagination
 				$links .= '<style>'.$css.'</style>';
 			}
 				
-			$links .= '<div class="pagination '.$this->args['css_class'].'"><ul>';
+			$links .= '<div class="pagination '.$this->args['container_class'].'"><ul>';
 			$links .= $this->first_link();
 			$links .= $this->prev_link();
 			$links .= $this->visible_page_number_links();

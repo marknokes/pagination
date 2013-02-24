@@ -4,9 +4,12 @@ include 'Pagination.class.php';
 /**
 * example usage:
 *
-* $rows_per_page 		= Pagination::get_rows_per_page();
-* $offset				= Pagination::get_offset();
-* $result 				= $db->query( SELECT SQL_CALC_FOUND_ROWS data FROM table WHERE column = 'var' LIMIT " . $rows_per_page . " OFFSET " . $offset . " );
+* $default_rows_per_page	= 10;
+* $max_rows_per_page 		= 99;
+* $page_GET_var 			= 'page-item';
+* $perpage_GET_var 			= 'items-per-page';
+* Pagination::set_up_vars( $default_rows_per_page , $max_rows_per_page , $page_GET_var , $perpage_GET_var );
+* $result 				= $db->query( SELECT SQL_CALC_FOUND_ROWS data FROM table WHERE column = 'var' LIMIT " . Pagination::get_rows_per_page() . " OFFSET " . Pagination::get_offset() . " );
 * 
 * // The following will get the total records as if not using the LIMIT above as long as the main query contains SQL_CALC_FOUND_ROWS
 * $found_rows_res		= $db->query("SELECT FOUND_ROWS()");
@@ -14,16 +17,23 @@ include 'Pagination.class.php';
 * $total_records		= $found_rows[0];
 */
 
-$total_records = 100;
+$default_rows_per_page	= 10;
+$max_rows_per_page 		= 99;
+$page_GET_var 			= 'page-item';
+$perpage_GET_var 		= 'items-per-page';
+Pagination::set_up_vars( $default_rows_per_page , $max_rows_per_page , $page_GET_var , $perpage_GET_var );
+// This will serve as the example query
+for ( $i = 1 ; $i <= 100 ; $i++ ){$test_array[$i] = 'Result ' . $i;}
+$results 			= array_slice( $test_array , Pagination::get_offset() , Pagination::get_rows_per_page() );
+$total_records		= sizeof($test_array);
+$visible_results	= implode( '<br />' , $results );
 
-// see class for defaults
+// see class for defaults/other args
 $pagination_args = array(
 	'total_records'			=> $total_records,
 	'visible_page_numbers' 	=> 5,
-	'page_get_var'			=> 'page-number',
-	'perpage_get_var'		=> 'items-per-page',
 	'style'					=> true,
-	'class'					=> 'custom-pagination-class',
+	'container_class'		=> 'custom-pagination-class',
 	'link_text'				=> array(
 		'next'	=> 'Next',
 		'prev'	=> 'Previous',
@@ -33,7 +43,7 @@ $pagination_args = array(
 );
 $pagination = new Pagination( $pagination_args );
 
-// see class for defaults
+// see class for defaults/other args
 $form_args = array(
 	'total_records'	=> $total_records,
 	'action'		=> basename( $_SERVER['PHP_SELF'] ),
@@ -48,7 +58,8 @@ $form_args = array(
 	<head>
 		<style>
 			.custom-form-class,
-			.custom-pagination-class {
+			.custom-pagination-class,
+			.items {
 				float:left;
 				clear:both;
 				margin:10px 0
@@ -57,18 +68,19 @@ $form_args = array(
 	</head>
 	<body>
 		<h1>Pagination Class Example</h1>
-		
-		<ul class="items">
+		<div class="items">
 			<?php
-			/*
-			* Example loop from example query above
+			/**
+			* //Do your loop here
 			* while ( $item = $result->fetch_object() )
 			* {
 			*	 echo '<li>' . $item->data . '</li>';
 			* }
 			*/
+			// I'll just echo my array slice
+			echo $visible_results;
 			?>
-		</ul>
+		</div>
 		<?php echo $pagination->links; ?>
 		<?php echo $pagination->results_per_page_form( $form_args ); ?>
 	</body>

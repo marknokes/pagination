@@ -29,9 +29,7 @@ class Pagination
 				'last'	=> '&#187;'
 			)
 		);
-				
-		$args = array_merge( $defaults, $args );
-		$this->args					= $args;
+		$this->args					= array_merge( $defaults, $args );
 		$this->rows_per_page 		= self::get_rows_per_page();
 		$this->current_page			= self::get_current_page();
 		$this->prev_page			= $this->current_page -1;

@@ -30,7 +30,7 @@ echo $pagination->results_per_page_form( $form_args );
 ```php
 // Pagination::set_up( array() ); // Optional
 
-$result = $db->query( SELECT SQL_CALC_FOUND_ROWS data FROM table WHERE column = 'var' LIMIT ". Pagination::get_rows_per_page() ." OFFSET ". Pagination::get_offset() ." );
+$result 			= $db->query( SELECT SQL_CALC_FOUND_ROWS data FROM table WHERE column = 'var' LIMIT ". Pagination::get_rows_per_page() ." OFFSET ". Pagination::get_offset() ." );
 
 // Total records without LIMIT. Note: The main query must contain SQL_CALC_FOUND_ROWS
 $found_rows_result 	= $db->query("SELECT FOUND_ROWS()");

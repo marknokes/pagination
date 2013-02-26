@@ -3,14 +3,13 @@
 class Pagination
 {
 	/**
-	* Constructs the pagination object in which is the list that contains the links
+	* Constructs the pagination object within which is a link list
 	*
-	* @param array $args Array of arguments. Defaults may be seen below in __construct()
+	* @param int $total_records The total records from the query without the limit clause. See example.php for an example of how to get this.
 	*
-	* @return object The only real use for the return object are the links, i.e., if you instantiate $pagination = new Pagination(),
-	*				 you would echo $pagination->links. Public methods include (static) get_offset(), result_per_page_form(),
-	*				 and (static) get_rows_per_page(). The two static methods may be useful for 
-	*				 your pagination query.
+	* @return object The only use for the return object is the links, i.e., if you instantiate $pagination, you will echo $pagination->links.
+	*				 Public methods include (static) get_offset(), result_per_page_form(), and (static) get_rows_per_page().
+	*				 The two public static methods may be useful for your db query.
 	*/
 	
 	private static $defaults = array(

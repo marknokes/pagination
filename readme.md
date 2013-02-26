@@ -6,14 +6,24 @@ set_up() method if you need to change the defaults.
 
 **Example**
 
-`$pagination_args = array( 'page_get_var' => 'the-page' );`
+```php
+$pagination_args = array(
+	'page_get_var' => 'the-page'
+);
 
-`Pagination::set_up( $pagination_args );`
+Pagination::set_up( $pagination_args );
+```
 
 The same is true for the results-per-page form.
 
 **Example**
+```php
+$form_args = array(
+	'method' 		=> 'POST', // Maybe if using ajax perhaps
+	'options' 		=> array(40,50,60),
+	'submit_text' 	=> 'Submit',
+	'label' 		=> 'Items per page: '
+);
 
-`$form_args = array( 'method' => 'GET', 'options' => array(40,50,60), 'submit_text' => 'Update', 'label' => 'Results per page: ' );`
-
-`echo $pagination->results_per_page_form( $form_args = array() );`
+echo $pagination->results_per_page_form( $form_args );
+```

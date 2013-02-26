@@ -1,26 +1,18 @@
 <?php
 include 'Pagination.class.php';
 
-/**
-* example usage:
-*
-* // Optional. Pass in an array here to alter the defaults. See class for defaults/optional args
-* // Pagination::set_up( array() );
-*
-* $result = $db->query( SELECT SQL_CALC_FOUND_ROWS data FROM table WHERE column = 'var' LIMIT ". Pagination::get_rows_per_page() ." OFFSET ". Pagination::get_offset() ." );
-* 
-* // Total records without LIMIT. Note: The main query must contain SQL_CALC_FOUND_ROWS
-* $found_rows_result = $db->query("SELECT FOUND_ROWS()");
-* $found_rows		 = $found_rows_result->fetch_row();
-* $total_records	 = $found_rows[0];
-*/
+// this will serve as a pretend db query...
+for ( $i = 1 ; $i <= 100 ; $i++ )
+{
+	$test_array[$i] = 'Result ' . $i;
+}
+$results 		= array_slice( $test_array , Pagination::get_offset() , Pagination::get_rows_per_page() );
 
-// example query
-for ( $i = 1 ; $i <= 100 ; $i++ ){ $test_array[$i] = 'Result ' . $i; }
-$results 			= array_slice( $test_array , Pagination::get_offset() , Pagination::get_rows_per_page() );
-$test_data			= implode( '<br />' , $results );
-$total_records		= sizeof($test_array);
-$pagination 		= new Pagination( $total_records );
+$test_data		= implode( '<br />' , $results );
+
+$total_records	= sizeof($test_array);
+
+$pagination 	= new Pagination( $total_records );
 ?>
 <html>
 	<head>

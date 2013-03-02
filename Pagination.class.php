@@ -161,9 +161,9 @@ class Pagination
 		
 		$query_vars = array_merge( $_GET, $page_vars );
 				
-		$query_string = http_build_query( $query_vars );
+		$query_string = '?' . http_build_query( $query_vars );
 		
-		return '?' . $query_string;
+		return $query_string;
 	}
 	
 	/**

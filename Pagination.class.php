@@ -2,6 +2,24 @@
 
 class Pagination
 {
+	/*
+	* The defaults array. If you need to change the defaults use Pagination::set_up( $args = array() )
+	*/
+	private static $defaults = array(
+		'default_rows_per_page' => 10,
+		'max_rows_per_page' 	=> 99,
+		'page_get_var' 			=> 'page',
+		'perpage_get_var' 		=> 'perpage',
+		'visible_page_numbers' 	=> 5,
+		'style'					=> true,
+		'link_text'				=> array(
+			'next'	=> 'Next',
+			'prev'	=> 'Previous',
+			'first'	=> '&#171;',
+			'last'	=> '&#187;'
+		)
+	);
+	
 	/**
 	* Constructs the pagination object within which is a link list
 	*
@@ -11,22 +29,6 @@ class Pagination
 	*				 Public methods include (static) get_offset(), result_per_page_form(), and (static) get_rows_per_page().
 	*				 The two public static methods may be useful for your db query.
 	*/
-	
-	private static $defaults = array(
-			'default_rows_per_page' => 10,
-			'max_rows_per_page' 	=> 99,
-			'page_get_var' 			=> 'page',
-			'perpage_get_var' 		=> 'perpage',
-			'visible_page_numbers' 	=> 5,
-			'style'					=> true,
-			'link_text'				=> array(
-				'next'	=> 'Next',
-				'prev'	=> 'Previous',
-				'first'	=> '&#171;',
-				'last'	=> '&#187;'
-			)
-		);
-	
 	function __construct( $total_records )
 	{
 		$this->total_records		= $total_records;
@@ -146,37 +148,22 @@ class Pagination
 	}
 		
 	/**
-	* Gets the current query string for use in the returned links
+	* Gets the current query string for use in render_link()
 	*
 	* @return string Returns a formatted query string with page and perpage and any other params that exist in the GET string
 	*/
-	private function get_query_string()
+	private function get_query_string( $page )
 	{
-		$disallow		= array( self::$defaults['perpage_get_var'] , self::$defaults['page_get_var'] );
-		$disallow_count	= sizeof( $disallow ) + 1;
-		$i				= $disallow_count - 1;
-		$query_string	= '';
+		$page_vars = array(
+			self::$defaults['perpage_get_var'] 	=> $this->rows_per_page,
+			self::$defaults['page_get_var']		=> $page
+		);
 		
-		foreach ( $_GET as $key => $value )
-		{
-			$i++;
-			if ( !in_array( $key , $disallow )  )
-			{
-				if ( $i == $disallow_count )
-				{
-					$query_string .= $key . '=' . urlencode( $value );
-				}
-				else
-				{
-					$query_string .= '&' . $key . '=' . urlencode( $value );
-				}	
-			}
-		}
-		if ( !empty( $query_string ) )
-		{
-			return $query_string . '&';
-		}
-		return '';
+		$query_vars = array_merge( $_GET, $page_vars );
+				
+		$query_string = http_build_query( $query_vars );
+		
+		return '?' . $query_string;
 	}
 	
 	/**
@@ -280,7 +267,7 @@ class Pagination
 	
 	private function render_link( $type , $page )
 	{
-		$url = '?' . $this->get_query_string() . self::$defaults['perpage_get_var'] .'='. $this->rows_per_page . '&'. self::$defaults['page_get_var'] .'=' . $page;
+		$url = $this->get_query_string( $page );
 		if ( $type == 'visible' )
 			$link = '<a class="pagination-anchor visible-page-number-'. $page .'" href="'. $url .'">'. $page .'</a>';
 		else

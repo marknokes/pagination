@@ -189,7 +189,7 @@ class Pagination
 		if ( $this->last_page != 1 && $this->last_page >= self::$defaults['visible_page_numbers'] )
 		{
 			$links_array = array();
-			for( $i = 1 ; $this->total_records >= $i ; $i++ )
+			for( $i = 1 ; $i <= $this->last_page ; $i++ )
 			{
 				if ( $i == $this->current_page )
 					$active = 'class="active"';

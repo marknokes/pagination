@@ -165,12 +165,8 @@ class Pagination
 			$links_array = array();
 			for( $i = 1 ; $i <= $this->last_page ; $i++ )
 			{
-				if ( $i == $this->current_page )
-					$active = 'class="active"';
-				else
-					$active = '';
-				
-				$links_array[$i] = '<li '. $active .'>'. $this->render_link( 'visible' , $i ) .'</li>';
+				$active = $i == $this->current_page ? ' class="active"' : '';
+				$links_array[$i] = '<li'. $active .'>'. $this->render_link( 'visible' , $i ) .'</li>';
 			}
 			$numbers_before = ceil( self::$defaults['visible_page_numbers']/2 );
 			$numbers_after 	= floor( self::$defaults['visible_page_numbers']/2 );
@@ -185,7 +181,7 @@ class Pagination
 				// middle
 				$visible = array_slice( $links_array , $this->current_page - $numbers_before , self::$defaults['visible_page_numbers'] );
 				
-			$links = implode( '' , $visible );
+			$links = implode( "\n" , $visible );
 			return $links;
 		}
 		return '';
@@ -265,7 +261,7 @@ class Pagination
 	/**
 	* Combine all of the links to create an unordered list
 	*
-	* @return string The html for the ul that contains the First, Prev, Visible Pages, Next, and Last links
+	* @return string The html for the ul that contains the First, Prev, Visible Pages, Next, and Last links or an empty string.
 	*/	
 	private function links()
 	{
@@ -290,6 +286,7 @@ class Pagination
 			$links .= '</ul>';
 			return $links;
 		}
-		return null;
+		else
+			return '';
 	}
 }

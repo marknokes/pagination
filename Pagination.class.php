@@ -95,9 +95,9 @@ class Pagination
 	/**
 	* Display a results per page form
 	*
-	* @param array $args Array that serves as the defaults.
+	* @param array $args Array that merges with the defaults.
 	*
-	* @return string The html that produces the form
+	* @return string The html that produces the form or an empty string if the total records do not exceed the first select option
 	*/
 	public function results_per_page_form( $args = array() )
 	{
@@ -119,32 +119,19 @@ class Pagination
 				if ( $param == self::$defaults['perpage_get_var'] || $param == self::$defaults['page_get_var'] ) continue;
 				$form .= '<input type="hidden" name="'. $param .'" value="'. $value .'">';
 			}
-			if ( $args['label'] )
-			{
-				$form.=	'<label for="perpage">'. $args['label'] .'</label>';
-			}
+			$form .= $args['label'] ? '<label for="perpage">'. $args['label'] .'</label>' : '';
 			$form .= '<select name="'. self::$defaults['perpage_get_var'] .'">';
-					foreach ( $args['options'] as $num )
-					{
-						if ( $_GET[self::$defaults['perpage_get_var']] == $num )
-						{
-							$form .= '<option selected="selected" value="'. $num .'">'. $num .'</option>';
-						}
-						else
-						{
-							$form .= '<option value="'. $num .'">'. $num .'</option>';
-						}
-					}
-					if ( $args['submit_text'] )
-					{
-						$form .= '<input type="submit" value="'. $args['submit_text'] .'">';
-					}
-					$form .= '
-				</select>
-			</form>';
+			foreach ( $args['options'] as $option )
+			{
+				$selected = $_GET[self::$defaults['perpage_get_var']] == $option ? ' selected' : '';
+				$form .= '<option value="'. $option .'"'. $selected .'>'. $option .'</option>';
+			}
+			$form .= $args['submit_text'] ? '<input type="submit" value="'. $args['submit_text'] .'">' : '';
+			$form .= '</select></form>';
 			return $form;
 		}
-		else return null;
+		else
+			return '';
 	}
 		
 	/**

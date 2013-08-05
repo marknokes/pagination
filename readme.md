@@ -8,8 +8,13 @@ set_up() method if you need to change the defaults.
 
 ```php
 $pagination_args = array(
-	'page_get_var' => 'the-page'
+	'page_get_var' 		=> 'the-page',
+	'css_file_path'		=> YOUR_TEMPLATE_PATH . '/css/pagination.css'
 );
+
+Note: The included css is extremely lean and is just provided as an example.
+To use it add your file path to $pagination_args['css_file_path']. Any file added to this path
+will be included immediately before the output of $pagination->links as a style block.
 
 Pagination::set_up( $pagination_args );
 ```

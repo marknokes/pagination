@@ -269,15 +269,12 @@ class Pagination
 		{
 			$links = '';
 			
-			if ( self::$defaults['css_file_path'] )
+			if ( self::$defaults['css_file_path'] && file_exists( self::$defaults['css_file_path'] ) )
 			{
-				if ( file_exists( self::$defaults['css_file_path'] ) )
-				{
-					ob_start();
-					include self::$defaults['css_file_path'];
-					$css = ob_get_clean();
-					$links .= '<style>'.$css.'</style>';
-				}
+				ob_start();
+				include self::$defaults['css_file_path'];
+				$css = ob_get_clean();
+				$links .= '<style>'.$css.'</style>';
 			}
 				
 			$links .= '<ul>';

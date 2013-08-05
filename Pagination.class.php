@@ -11,7 +11,7 @@ class Pagination
 		'page_get_var' 			=> 'page',
 		'perpage_get_var' 		=> 'perpage',
 		'visible_page_numbers' 	=> 5,
-		'style'					=> true,
+		'css_file_path'			=> '',
 		'link_text'				=> array(
 			'next'	=> 'Next',
 			'prev'	=> 'Previous',
@@ -269,12 +269,15 @@ class Pagination
 		{
 			$links = '';
 			
-			if ( self::$defaults['style'] )
+			if ( self::$defaults['css_file_path'] )
 			{
-				ob_start();
-				include 'pagination.css';
-				$css = ob_get_clean();
-				$links .= '<style>'.$css.'</style>';
+				if ( file_exists( self::$defaults['css_file_path'] ) )
+				{
+					ob_start();
+					include self::$defaults['css_file_path'];
+					$css = ob_get_clean();
+					$links .= '<style>'.$css.'</style>';
+				}
 			}
 				
 			$links .= '<ul>';

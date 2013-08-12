@@ -126,8 +126,9 @@ class Pagination
 				$selected = $_GET[self::$defaults['perpage_get_var']] == $option ? ' selected' : '';
 				$form .= '<option value="'. $option .'"'. $selected .'>'. $option .'</option>';
 			}
+			$form .= '</select>';
 			$form .= $args['submit_text'] ? '<input type="submit" value="'. $args['submit_text'] .'">' : '';
-			$form .= '</select></form>';
+			$form .= '</form>';
 			return $form;
 		}
 		else

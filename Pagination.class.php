@@ -71,6 +71,7 @@ class Pagination
 	public static function get_rows_per_page()
 	{
 		$rows_per_page 	= (
+			isset( $_GET[self::$defaults['perpage_get_var']] ) &&
 			$_GET[self::$defaults['perpage_get_var']] &&
 			is_numeric( $_GET[self::$defaults['perpage_get_var']] ) &&
 			( $_GET[self::$defaults['perpage_get_var']] <= self::$defaults['max_rows_per_page'] )
@@ -86,6 +87,7 @@ class Pagination
 	private static function get_current_page()
 	{
 		$current_page 	= (
+			isset( $_GET[self::$defaults['page_get_var']] ) &&
 			$_GET[self::$defaults['page_get_var']] &&
 			is_numeric( $_GET[self::$defaults['page_get_var']] )
 		) ? $_GET[self::$defaults['page_get_var']] : 1;
@@ -111,23 +113,26 @@ class Pagination
 		
 		$args = array_merge( $defaults , $args );
 		
+		$perpage_get_var 	= isset( self::$defaults['perpage_get_var'] ) ? self::$defaults['perpage_get_var'] : '';
+		$page_get_var		= isset( self::$defaults['page_get_var'] ) ? self::$defaults['page_get_var'] : ''; 
+		
 		if ( $this->total_records > $args['options'][0] )
 		{
-			$form = '<form action="'. $args['action'] .'" method="'. $args['method'] .'">';
+			$form = '<form class="form-horizontal" action="'. $args['action'] .'" method="'. $args['method'] .'">';
 			foreach ( $_GET as $param => $value )
 			{	
-				if ( $param == self::$defaults['perpage_get_var'] || $param == self::$defaults['page_get_var'] ) continue;
+				if ( $param == $perpage_get_var || $param == $page_get_var ) continue;
 				$form .= '<input type="hidden" name="'. $param .'" value="'. $value .'">';
 			}
 			$form .= $args['label'] ? '<label for="perpage">'. $args['label'] .'</label>' : '';
-			$form .= '<select name="'. self::$defaults['perpage_get_var'] .'">';
+			$form .= '<select name="'. $perpage_get_var .'">';
 			foreach ( $args['options'] as $option )
 			{
-				$selected = $_GET[self::$defaults['perpage_get_var']] == $option ? ' selected' : '';
+				$selected = $perpage_get_var == $option ? ' selected' : '';
 				$form .= '<option value="'. $option .'"'. $selected .'>'. $option .'</option>';
 			}
 			$form .= '</select>';
-			$form .= $args['submit_text'] ? '<input type="submit" value="'. $args['submit_text'] .'">' : '';
+			$form .= $args['submit_text'] ? ' <input type="submit" value="'. $args['submit_text'] .'">' : '';
 			$form .= '</form>';
 			return $form;
 		}
@@ -269,8 +274,7 @@ class Pagination
 		if ( $this->last_page != 0 && $this->total_records > $this->rows_per_page )
 		{
 			$links = '';
-			
-			if ( self::$defaults['css_file_path'] && file_exists( self::$defaults['css_file_path'] ) )
+			if ( self::$defaults['css_file_path'] && file_exists( self::$defaults['css_file_path'] )  )
 			{
 				ob_start();
 				include self::$defaults['css_file_path'];

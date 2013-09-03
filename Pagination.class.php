@@ -128,7 +128,7 @@ class Pagination
 			$form .= '<select name="'. $perpage_get_var .'">';
 			foreach ( $args['options'] as $option )
 			{
-				$selected = $perpage_get_var == $option ? ' selected' : '';
+				$selected = $_GET[self::$defaults['perpage_get_var']] == $option || ( !isset( $_GET[self::$defaults['perpage_get_var']] ) && self::$defaults['default_rows_per_page'] ) == $option ? ' selected' : '';
 				$form .= '<option value="'. $option .'"'. $selected .'>'. $option .'</option>';
 			}
 			$form .= '</select>';
